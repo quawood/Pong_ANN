@@ -18,7 +18,8 @@ class Layer:
 
     def forward_propogate(self, a):
         self.a = a
-        a = np.append([1], a).reshape((1, self.n + 1))
+        m = a.shape[0]
+        a = np.append(np.ones((m,1)), a).reshape((m, self.n + 1))
         new_z = a.dot(self.W)
 
         return new_z

@@ -1,5 +1,6 @@
 
 from Layer import Layer
+import numpy as np
 class Network:
     layers = []
 
@@ -42,18 +43,19 @@ class Network:
                 next_layer = self.layers[l + 1]
                 C_derive = (layer.a * next_layer.d)
                 layer.W = layer.W - eta * C_derive
-                if sum(C_derive) < 0.05:
+                if np.all(C_derive) < 0.05:
                     looping = False
-
 
     def train(self, X, y):
         output_layer = self.layers[self.L-1]
-        output_error = self.cost_function(X, y, self.predict, derive_a=True)*self.activation_function(output_layer.z, derive_a=True)
+        output_error = self.cost_function(X, y, self.predict, derive_a=True)*self.activation_function(output_layer.z, derive_z=True)
 
         delta_pred = output_error
         for l in range(self.L-1,0,-1 ):
             next_d = self.layers[l].backward_propogate(d=delta_pred,next_layer=self.layers[l-1], activation_function=self.activation_function)
             self.layers[l-1].d = next_d
+
+        self.gradient_descent(0.001, 2000)
 
 
 
