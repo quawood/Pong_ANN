@@ -19,11 +19,13 @@ class Layer:
     def forward_propogate(self, a):
         self.a = a
         m = a.shape[0]
-        a = np.append(np.ones((m,1)), a).reshape((m, self.n + 1))
+        a = np.concatenate((np.ones((m,1)),a),axis=1)
         new_z = a.dot(self.W)
 
         return new_z
 
     def backward_propogate(self, d, next_layer, activation_function):
-        return next_layer.W.T.dot(d) * activation_function(next_layer.z, derive_z=True)
+        part1 = d.dot(next_layer.W.T)
+        part2 = activation_function(next_layer.z, derive_z=True)
+        #return part1*part2
 

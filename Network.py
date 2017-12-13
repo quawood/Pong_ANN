@@ -48,12 +48,14 @@ class Network:
 
     def train(self, X, y):
         output_layer = self.layers[self.L-1]
-        output_error = self.cost_function(X, y, self.predict, derive_a=True)*self.activation_function(output_layer.z, derive_z=True)
+        part1 = self.cost_function(X, y, self.predict, derive_a=True)
+        part2 = self.activation_function(output_layer.z, derive_z=True)
+        output_error = part1*part2
 
         delta_pred = output_error
         for l in range(self.L-1,0,-1 ):
-            next_d = self.layers[l].backward_propogate(d=delta_pred,next_layer=self.layers[l-1], activation_function=self.activation_function)
-            self.layers[l-1].d = next_d
+            delta_pred = self.layers[l].backward_propogate(d=delta_pred,next_layer=self.layers[l-1], activation_function=self.activation_function)
+            self.layers[l-1].d = delta_pred
 
         self.gradient_descent(0.001, 2000)
 
