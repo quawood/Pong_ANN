@@ -4,6 +4,7 @@ import random
 import operator
 from Iter import Iter
 class Environment:
+    population = []
     def __init(self):
         self.population = []
         self.ancestry = []
