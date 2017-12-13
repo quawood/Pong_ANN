@@ -73,13 +73,14 @@ class Network:
         self.layers[self.L-1].d = delta_pred
         m = self.X.shape[0]
         for l in range(self.L-1,0,-1 ):
-            if not l == 1:
+            if not l == 0:
                 weight_size = self.layers[l - 1].W.shape[0]
                 delm = delta_pred
                 if l < self.L - 1:
                     last = delm[:, delm.shape[1] - 1].reshape((m, 1))
                     first = np.delete(delm, np.s_[-1:], axis=1)
                     delm = first + last
+
 
                 delta_pred = self.layers[l].backward_propogate(d=delm, next_layer=self.layers[l - 1],
                                                                activation_function=self.activation_function)
