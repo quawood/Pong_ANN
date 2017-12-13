@@ -1,8 +1,8 @@
 import numpy as np
-from Network import Network
-from sigmoid import sigmoid, scalar
-import math
-from quadratic_cost import quadratic_cost, magnitude
+
+from ANN.Network import Network
+from ANN.quadratic_cost import quadratic_cost
+from ANN.sigmoid import scalar
 
 network = Network(layer_size=[2,3,2], activation_function=scalar, cost_function=quadratic_cost)
 

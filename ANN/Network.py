@@ -1,6 +1,8 @@
-
-from Layer import Layer
 import numpy as np
+
+from ANN.Layer import Layer
+
+
 class Network:
     layers = []
 

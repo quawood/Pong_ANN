@@ -1,5 +1,4 @@
 import numpy as np
-import sigmoid as sigmoid
 
 
 class Layer:
