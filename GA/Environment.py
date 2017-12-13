@@ -2,20 +2,19 @@ import numpy as np
 from GA.Agent import Agent
 import random
 import operator
-
+from Iter import Iter
 class Environment:
     def __init(self):
         self.population = []
         self.ancestry = []
         self.N = len(self.population)
 
-
     def population_init(self, num):
         for a in range(0, num):
             agent = Agent(generation=0)
             self.population.append(agent)
 
-    def new_generation(self, population, num):
+    def new_generation(self, num):
         new_population = []
         n = num
 
@@ -46,11 +45,10 @@ class Environment:
         new_population.append(best[rand1])
         new_population.append(best[rand2])
 
-        self.ancestry.append(population)
+        self.ancestry.append(self.population)
         self.population = new_population
 
-
-
+        self.mutate_popluation()
 
     def select(self, fitness, n):
         for a in range(0, self.N):
@@ -63,42 +61,53 @@ class Environment:
 
         return best
 
-
     def crossover(self,a,b):
         #flatten out weight matrices for agent neural networks
-        a_weights = np.array([])
-        b_weights = np.array([])
-
-        for i in (0, a.ann.L):
-            np.append(a_weights, (a.ann.layers[i].W.flatten()))
-            np.append(b_weights, (b.ann.layers[i].W.flatten()))
-
-        a_weights = a_weights.flatten()
-        b_weights = b_weights.flatten()
-        new_weights = np.ones((a_weights.shape))
-        l = len(a_weights)
-
-        #define random crossover point
-        crossover_point = random.randint(1, l-2)
-        for p in range(0,l):
-            if p < crossover_point:
-                new_weights[p] = a_weights[p]
+        a_w = self.to_iter(a)
+        b_w = self.to_iter(b)
+        new_w = a_w
+        l = a_w.max()
+        random_crossover = random.randint(1, l - 2)
+        for i in range(0,l):
+            index = new_w.int_to_matrix(i)[1]
+            if i < random_crossover:
+                new_w.iterative_array[index] = a_w.iterative_array[index]
             else:
-                new_weights[p] = b_weights[p]
+                new_w.iterative_array[index] = b_w.iterative_array[index]
 
-        c = Agent(0)
-        for i in (0, a.ann.L):
-            c.ann.layers[i].W = new_weights #Come back to this
+        c = Agent(len(self.ancestry)+1)
+        for i in range(0, a.ann.L):
+            c.ann.layers[i].W = np.array(new_w.iterative_array[i])
 
         return c
 
     def mutate(self, mutation_rate, a):
         rand = random.uniform(0, 1)
+        a_w = self.to_iter(a)
+        l = a_w.max()
+        for i in range(0, l):
+            index = a_w.int_to_matrix(i)[1]
+            if rand < mutation_rate:
+                mutateFactor = 1 + ((random.uniform - 0.5) * 3 + (random.uniform - 0.5))
+                a_w.iterative_array[index] *= mutateFactor
 
-        if random < mutation_rate:
-            print("mutate a")
-        return a
+        c = Agent(len(self.ancestry)+1)
+        for i in range(0, a.ann.L):
+            c.ann.layers[i].W = np.array(a_w.iterative_array[i])
 
+        return c
+
+    def mutate_population(self):
+        for a in range(0, len(self.population)):
+            self.population[a] = self.mutate(0.2, self.population[a])
 
     def fitness(self, score):
         return score
+
+    def to_iter(self, a):
+        a_weights = []
+        for i in (0, a.ann.L):
+            a_weights.append(a.ann.layers[i].W)
+
+        a_w = Iter(a_weights)
+        return a_w
