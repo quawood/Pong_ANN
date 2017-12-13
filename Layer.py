@@ -12,6 +12,7 @@ class Layer:
 
         #set up layer
         self.W = np.ones(shape=(input_n+1, output_n))
+
         self.a = np.zeros((1, input_n+1))
         self.z = np.zeros((1, input_n+1))
         self.d = np.zeros((1, input_n+1))
@@ -20,6 +21,7 @@ class Layer:
         m = a.shape[0]
         a = np.concatenate((np.ones((m,1)),a),axis=1)
         self.a = a
+        self.z = a
 
         new_z = a.dot(self.W)
 

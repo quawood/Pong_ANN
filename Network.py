@@ -37,9 +37,14 @@ class Network:
             looping = True
             i  = 0
             while looping:
-
+                weight_size = self.layers[l-1].W.shape[0]
                 C_derive = (self.layers[l-1].a.T).dot(self.layers[l].d)
-                C_derive = np.sum(C_derive, axis=1).T.reshape((self.layers[l-1].W.shape))
+                if not l == self.L-1:
+
+                    last = C_derive[:,C_derive.shape[1]-1].reshape((weight_size,1))
+                    first = np.delete(C_derive, np.s_[-1:], axis=1)
+                    C_derive = first+last
+
 
                 self.layers[l-1].W = self.layers[l-1].W - (eta/m) * C_derive
 
