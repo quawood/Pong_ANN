@@ -1,8 +1,14 @@
 import numpy as np
 
-def quadratic_cost(X, y, hypothesis, derive_a=False):
-    m = X.shape[0]
+
+def quadratic_cost(x, y, hypothesis, derive_a=False):
+    d = y - hypothesis(x)
     if not derive_a:
-        return (1/2)*(np.power(y - hypothesis(X), 2))
+        return (1/2)*np.apply_along_axis(magnitude, 1, d)
     else:
-        return (hypothesis(X) - y)
+        return -(d)
+
+
+def magnitude(v):
+    mag = v.dot(v.T)
+    return np.power(mag, (1/2))

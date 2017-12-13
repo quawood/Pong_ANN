@@ -22,9 +22,7 @@ class Network:
 
     def predict(self, x):
         prediction = x
-
         if x.shape[1] == self.layers[0].n:
-            self.layers[0].a = x
             for l in range(0, self.L-1):
                 next_z = self.layers[l].forward_propogate(a=prediction)
                 prediction = self.activation_function(next_z, derive_z=False)
@@ -34,30 +32,43 @@ class Network:
         return prediction
 
     def gradient_descent(self, eta, max_iterations):
-
-        for l in range(0, self.L-1):
+        m = self.X.shape[0]
+        for l in range(self.L - 1, 0, -1):
             looping = True
-
+            i  = 0
             while looping:
-                layer = self.layers[l]
-                next_layer = self.layers[l + 1]
-                C_derive = (layer.a * next_layer.d)
-                layer.W = layer.W - eta * C_derive
-                if np.all(C_derive) < 0.05:
+
+                C_derive = (self.layers[l-1].a.T).dot(self.layers[l].d)
+
+                self.layers[l-1].W = self.layers[l-1].W - (eta/m) * C_derive
+
+                self.back_prop(self.X, self.y)
+
+                i += 1
+                if i == max_iterations:
                     looping = False
 
-    def train(self, X, y):
+
+    def train(self, X, y, eta, max_iterations):
+        m = X.shape[0]
+        self.X = X
+        self.y = y
+        self.back_prop(X,y)
+
+        self.gradient_descent(eta, max_iterations)
+
+    def back_prop(self, X, y):
         output_layer = self.layers[self.L-1]
-        part1 = self.cost_function(X, y, self.predict, derive_a=True)
-        part2 = self.activation_function(output_layer.z, derive_z=True)
-        output_error = part1*part2
+        nabla_c = self.cost_function(X, y, self.predict, derive_a=True)
+        sigmoid_prime = self.activation_function(output_layer.z, derive_z=True)
+
+        output_error = nabla_c*sigmoid_prime
 
         delta_pred = output_error
+        self.layers[self.L-1].d = delta_pred
+
         for l in range(self.L-1,0,-1 ):
-            delta_pred = self.layers[l].backward_propogate(d=delta_pred,next_layer=self.layers[l-1], activation_function=self.activation_function)
-            self.layers[l-1].d = delta_pred
-
-        self.gradient_descent(0.001, 2000)
-
-
-
+            if not self.layers[l-1].is_input:
+                delta_pred = self.layers[l].backward_propogate(d=delta_pred, next_layer=self.layers[l - 1],
+                                                               activation_function=self.activation_function)
+                self.layers[l - 1].d = delta_pred
