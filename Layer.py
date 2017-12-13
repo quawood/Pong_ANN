@@ -20,6 +20,7 @@ class Layer:
         m = a.shape[0]
         a = np.concatenate((np.ones((m,1)),a),axis=1)
         self.a = a
+
         new_z = a.dot(self.W)
 
         return new_z

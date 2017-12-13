@@ -39,6 +39,7 @@ class Network:
             while looping:
 
                 C_derive = (self.layers[l-1].a.T).dot(self.layers[l].d)
+                C_derive = np.sum(C_derive, axis=1).T.reshape((self.layers[l-1].W.shape))
 
                 self.layers[l-1].W = self.layers[l-1].W - (eta/m) * C_derive
 
