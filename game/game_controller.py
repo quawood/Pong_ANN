@@ -79,11 +79,9 @@ def draw(canvas, running):
     still_running = running
     #check for win
     if ball.pos[0] > canvas_width:
-        print("point for player 2")
         player2.score += 1
         still_running = False
     elif ball.pos[0] < 0:
-        print("point for player 1")
         player1.score += 1
         still_running = False
 

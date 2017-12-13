@@ -10,7 +10,7 @@ class Layer:
         self.is_output = is_output
 
         #set up layer
-        self.W = np.ones(shape=(input_n+1, output_n))
+        self.W = np.random.uniform(size=(input_n+1, output_n))
 
         self.a = np.zeros((1, input_n+1))
         self.z = np.zeros((1, input_n+1))
