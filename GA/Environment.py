@@ -3,17 +3,23 @@ from GA.Agent import Agent
 import random
 import operator
 from Iter import Iter
+import helpers
+import itertools
+
+
 class Environment:
-    population = []
-    def __init(self):
+
+    def __init__(self):
         self.population = []
         self.ancestry = []
-        self.N = len(self.population)
+        self.N = 0
 
     def population_init(self, num):
         for a in range(0, num):
             agent = Agent(generation=0)
             self.population.append(agent)
+
+        self.N = len(self.population)
 
     def new_generation(self, num):
         new_population = []
@@ -48,8 +54,7 @@ class Environment:
 
         self.ancestry.append(self.population)
         self.population = new_population
-
-        self.mutate_popluation()
+        self.mutate_population()
 
     def select(self, fitness, n):
         for a in range(0, self.N):
@@ -67,34 +72,39 @@ class Environment:
         a_w = self.to_iter(a)
         b_w = self.to_iter(b)
         new_w = a_w
-        l = a_w.max()
-        random_crossover = random.randint(1, l - 2)
-        for i in range(0,l):
-            index = new_w.int_to_matrix(i)[1]
+        L = self.get_max(a_w)
+        random_crossover = random.randint(1, L - 2)
+        for i in range(0,L):
+            iterator = Iter(i)
+            index = iterator.int_to_matrix(array=new_w)[1]
             if i < random_crossover:
-                new_w.iterative_array[index] = a_w.iterative_array[index]
+                print(index)
+                new_w[index[0]][index[1]][index[2]] = new_w[index[0]][index[1]][index[2]]
             else:
-                new_w.iterative_array[index] = b_w.iterative_array[index]
+                new_w[index[0]][index[1]][index[2]] = b_w[index[0]][index[1]][index[2]]
 
         c = Agent(len(self.ancestry)+1)
         for i in range(0, a.ann.L):
-            c.ann.layers[i].W = np.array(new_w.iterative_array[i])
+            c.ann.layers[i].W = new_w[i]
 
         return c
 
     def mutate(self, mutation_rate, a):
         rand = random.uniform(0, 1)
         a_w = self.to_iter(a)
-        l = a_w.max()
-        for i in range(0, l):
-            index = a_w.int_to_matrix(i)[1]
+
+        #calculate legnth of flattened weights matrix
+        L = self.get_max(a_w)
+        for i in range(0, L):
+            iterator = Iter(i)
+            index = iterator.int_to_matrix(array=a_w)[1]
             if rand < mutation_rate:
                 mutateFactor = 1 + ((random.uniform - 0.5) * 3 + (random.uniform - 0.5))
-                a_w.iterative_array[index] *= mutateFactor
+                a_w[index[0]][index[1]][index[2]] *= mutateFactor
 
         c = Agent(len(self.ancestry)+1)
         for i in range(0, a.ann.L):
-            c.ann.layers[i].W = np.array(a_w.iterative_array[i])
+            c.ann.layers[i].W = np.array(a_w[i])
 
         return c
 
@@ -103,12 +113,21 @@ class Environment:
             self.population[a] = self.mutate(0.2, self.population[a])
 
     def fitness(self, score):
+        #fitness function
         return score
 
     def to_iter(self, a):
+        #returns multidimensional array with weight values of the network of agent a
         a_weights = []
-        for i in (0, a.ann.L):
-            a_weights.append(a.ann.layers[i].W)
+        for i in range(0, a.ann.L-1):
+            a_weights.append(a.ann.layers[i].W.tolist())
 
-        a_w = Iter(a_weights)
+        a_w = a_weights
         return a_w
+
+    def get_max(self, a):
+        #return number of elements in weights array
+        L = helpers._List_Amount(a)
+
+        return L
+

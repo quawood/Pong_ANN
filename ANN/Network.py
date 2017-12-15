@@ -4,19 +4,20 @@ from ANN.Layer import Layer
 
 
 class Network:
-    layers = []
 
     def __init__(self, layer_size, activation_function, cost_function):
         self.activation_function = activation_function
         self.cost_function = cost_function
-        for l in range(0, len(layer_size)):
-            holder = layer_size
-            holder.append(0)
+        self.layers = []
+        holder = layer_size
+        holder.append(0)
+        for l in range(0, len(layer_size)-1):
+
             is_input = False
             is_output = False
             if l == 0:
                 is_input = True
-            elif l == len(layer_size)-1:
+            elif l == len(layer_size)-2:
                 is_output = True
             layer = Layer(input_n=holder[l], output_n=holder[l+1], is_input=is_input, is_output=is_output)
             self.layers.append(layer)
