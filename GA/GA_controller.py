@@ -6,3 +6,6 @@ world = Environment()
 world.population_init(10)
 
 world.new_generation(4)
+
+
+

@@ -9,8 +9,11 @@ class Network:
         self.activation_function = activation_function
         self.cost_function = cost_function
         self.layers = []
+        self.layer_size = []
         holder = layer_size
         holder.append(0)
+
+        #create layer for each size in layer_size
         for l in range(0, len(layer_size)-1):
 
             is_input = False
@@ -21,6 +24,13 @@ class Network:
                 is_output = True
             layer = Layer(input_n=holder[l], output_n=holder[l+1], is_input=is_input, is_output=is_output)
             self.layers.append(layer)
+
+            #keep array of sizes of layers
+            if not is_output:
+                self.layer_size.append(layer_size[l] + 1)
+            else:
+                self.layer_size.append(layer_size[l])
+
         self.L = len(self.layers)
 
     def predict(self, x):

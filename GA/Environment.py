@@ -2,6 +2,7 @@ import numpy as np
 from GA.Agent import Agent
 import random
 import operator
+import numpy as np
 from Iter import Iter
 import helpers
 import itertools
@@ -18,7 +19,6 @@ class Environment:
         for a in range(0, num):
             agent = Agent(generation=0)
             self.population.append(agent)
-
         self.N = len(self.population)
 
     def new_generation(self, num):
@@ -27,13 +27,14 @@ class Environment:
 
         best = self.select(self.fitness, n)
 
-        #add all the best to next population
-        new_population.append(best)
+        # add all the best to next population
+        for b in range(0, len(best)):
+            new_population.append(best[b])
 
-        #Choose offspring as direct cross over of best
+        # Choose offspring as direct cross over of best
         new_population.append(self.crossover(best[0], best[1]))
 
-        #choose two random winners
+        # choose two random winners
         rand1 = random.randint(0,n-1)
         rand2 = random.randint(0,n-1)
         different = False
@@ -46,13 +47,14 @@ class Environment:
             new_population.append(self.crossover(best[rand1], best[rand2]))
 
 
-        #add direct copy of two random winners
+        # add direct copy of two random winners
         rand1 = random.randint(0, n - 1)
         rand2 = random.randint(0, n - 1)
         new_population.append(best[rand1])
         new_population.append(best[rand2])
 
         self.ancestry.append(self.population)
+
         self.population = new_population
         self.mutate_population()
 
@@ -68,66 +70,53 @@ class Environment:
         return best
 
     def crossover(self,a,b):
-        #flatten out weight matrices for agent neural networks
-        a_w = self.to_iter(a)
-        b_w = self.to_iter(b)
-        new_w = a_w
-        L = self.get_max(a_w)
-        random_crossover = random.randint(1, L - 2)
-        for i in range(0,L):
-            iterator = Iter(i)
-            index = iterator.int_to_matrix(array=new_w)[1]
-            if i < random_crossover:
-                print(index)
-                new_w[index[0]][index[1]][index[2]] = new_w[index[0]][index[1]][index[2]]
-            else:
-                new_w[index[0]][index[1]][index[2]] = b_w[index[0]][index[1]][index[2]]
-
+        # flatten out weight matrices for agent neural networks
         c = Agent(len(self.ancestry)+1)
-        for i in range(0, a.ann.L):
-            c.ann.layers[i].W = new_w[i]
+        L = []
 
+        # get array of size of weight matrices in weights list
+        for l in range(0, len(a.ann.layer_size)-1):
+            L.append((a.ann.layer_size[l]*(a.ann.layer_size[l+1]-1)) + sum(L))
+        # create random crossover point
+        random_crossover = random.randint(1, L[len(L)-1])
+        for i in range(0,L[len(L)-1]):
+            for j in range(0, len(L)):
+                if i < (L[j]):
+                    # calculate how many elmements into jth matrix in a_wr
+                    k = i - sum(L[:j])
+
+                    # go from jth element to rth row and cth column
+                    row = k // (np.size(a.ann.layers[j].W, 1))
+                    column = k % (np.size(a.ann.layers[j].W, 1))
+
+                    if i < random_crossover:
+                        c.ann.layers[j].W[row,column] = a.ann.layers[j].W[row,column]
+                    else:
+                        c.ann.layers[j].W[row,column] = b.ann.layers[j].W[row,column]
+                    break
         return c
 
     def mutate(self, mutation_rate, a):
         rand = random.uniform(0, 1)
-        a_w = self.to_iter(a)
 
-        #calculate legnth of flattened weights matrix
-        L = self.get_max(a_w)
-        for i in range(0, L):
-            iterator = Iter(i)
-            index = iterator.int_to_matrix(array=a_w)[1]
-            if rand < mutation_rate:
-                mutateFactor = 1 + ((random.uniform - 0.5) * 3 + (random.uniform - 0.5))
-                a_w[index[0]][index[1]][index[2]] *= mutateFactor
+        for i in range(0, len(a.ann.layer_size)):
+            for j in range(0, a.ann.layers[i].W.shape[0]):
+                for k in range(0, a.ann.layers[i].W.shape[1]):
+                    if rand < mutation_rate:
+                        mutateFactor = 1 + ((random.uniform(0,1) - 0.5) * 3 + (random.uniform(0,1) - 0.5))
+                        a.ann.layers[i].W[j, k] *= mutateFactor
 
-        c = Agent(len(self.ancestry)+1)
-        for i in range(0, a.ann.L):
-            c.ann.layers[i].W = np.array(a_w[i])
-
-        return c
+        return a
 
     def mutate_population(self):
         for a in range(0, len(self.population)):
             self.population[a] = self.mutate(0.2, self.population[a])
 
+
     def fitness(self, score):
-        #fitness function
+        # fitness function
         return score
 
-    def to_iter(self, a):
-        #returns multidimensional array with weight values of the network of agent a
-        a_weights = []
-        for i in range(0, a.ann.L-1):
-            a_weights.append(a.ann.layers[i].W.tolist())
 
-        a_w = a_weights
-        return a_w
 
-    def get_max(self, a):
-        #return number of elements in weights array
-        L = helpers._List_Amount(a)
-
-        return L
 
