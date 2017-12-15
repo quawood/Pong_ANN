@@ -2,16 +2,18 @@ import pygame, sys, time
 from pygame.locals import *
 import random
 import math
-class Player:
-    is_AI = True
-    side = 0
-    score = 0
-    pos = 0
-    vel = 0
-    def __init__(self, is_AI, side):
-        self.is_AI = is_AI
-        self.side = side
+from GA.Agent import Agent
 
+class Player:
+
+    def __init__(self,side, a=None):
+        if isinstance(a, Agent):
+            self.is_AI = True
+            self.agent = a
+        self.side = side
+        self.score = 0
+        self.pos = 0
+        self.vel = 0
 
 
 class Ball:

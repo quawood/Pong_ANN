@@ -7,7 +7,6 @@ from Iter import Iter
 import helpers
 import itertools
 
-
 class Environment:
 
     def __init__(self):
