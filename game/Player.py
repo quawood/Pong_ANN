@@ -22,7 +22,7 @@ class Ball:
     direction = 0
 
     def __init__(self):
-        self.direction = random.randint(0,1)*math.radians(180)
+        self.direction = random.uniform(-1,1)*math.radians(45) + random.randint(0,1)*math.radians(180)
 
         self.speed = 15
 
