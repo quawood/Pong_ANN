@@ -20,11 +20,11 @@ class Environment:
             self.population.append(agent)
         self.N = len(self.population)
 
-    def new_generation(self, num):
+    def new_generation(self, num, best):
         new_population = []
         n = num
 
-        best = self.select(self.fitness, n)
+
 
         # add all the best to next population
         for b in range(0, len(best)):

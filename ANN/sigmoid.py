@@ -14,3 +14,17 @@ def scalar(x, derive_z=False):
         return x
     else:
         return np.ones(x.shape)
+
+
+def reLu(x, derive_z=False):
+    if not derive_z:
+        return np.maximum(x, 0)
+    else:
+        return x>0
+
+def tanh(x, derive_z=False):
+    htan = (np.exp(x) - np.exp(-x))/(np.exp(x) + np.exp(-x))
+    if not derive_z:
+        return htan
+    else:
+        return 1 - np.power(htan, 2)
